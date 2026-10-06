@@ -15,6 +15,8 @@ export const padelDb = createClient(PADEL_URL, PADEL_KEY, {
 export const PADEL_TENANT = "santos-sports-bar";
 export const PADEL_TZ = "Europe/Madrid";
 export const BOOKING_HORIZON_DAYS = 30;
+// Duración de cada reserva en minutos (1h15). Debe coincidir con padel_settings.slot_minutes.
+export const SLOT_MINUTES = 75;
 
 export interface Slot {
   start_time: string;
@@ -54,6 +56,8 @@ export async function getSlots(date: string): Promise<Slot[]> {
   return (data ?? []) as Slot[];
 }
 
+// Si hay sesión iniciada, el servidor usa el email confirmado de la cuenta y detecta si es socio
+// (los socios reservan con precio 0 y pago "member").
 export async function createBooking(
   date: string,
   start: string,
@@ -72,4 +76,21 @@ export async function createBooking(
   if (error) throw new Error(error.message);
   const row = Array.isArray(data) ? data[0] : data;
   return row as BookingResult;
+}
+
+// ¿La sesión actual pertenece a un socio activo? (sin sesión devuelve false)
+export async function isMember(): Promise<boolean> {
+  const { data, error } = await padelDb.rpc("padel_is_member", { p_tenant: PADEL_TENANT });
+  if (error) return false;
+  return data === true;
+}
+
+// Solo administradores. Conserva el precio y el estado de pago de la reserva original.
+export async function rescheduleBooking(bookingId: string, date: string, start: string): Promise<void> {
+  const { error } = await padelDb.rpc("padel_reschedule_booking", {
+    p_booking: bookingId,
+    p_date: date,
+    p_start: start,
+  });
+  if (error) throw new Error(error.message);
 }
