@@ -24,6 +24,8 @@ import Changelog from "./pages/info/Changelog";
 import Ayuda from "./pages/info/Ayuda";
 import Guias from "./pages/info/Guias";
 import ApiDocs from "./pages/info/ApiDocs";
+import PadelBooking from "./pages/PadelBooking";
+import PadelAdmin from "./pages/PadelAdmin";
 import CookieBanner from "./components/CookieBanner";
 
 const queryClient = new QueryClient();
@@ -64,6 +66,8 @@ const App = () => (
               <ProtectedRoute requiredRole="superadmin"><SuperAdmin /></ProtectedRoute>
             } />
             <Route path="/r/:slug" element={<PublicRestaurant />} />
+            <Route path="/padel" element={<PadelBooking />} />
+            <Route path="/padel/admin" element={<PadelAdmin />} />
             <Route path="/caracteristicas" element={<Caracteristicas />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/demo" element={<Demo />} />
